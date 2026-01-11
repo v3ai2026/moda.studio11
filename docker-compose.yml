@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: magicai_app:latest
+    working_dir: /var/www/html
+    volumes:
+      - ./server:/var/www/html:cached
+    depends_on:
+      - db
+
+  web:
+    image: nginx:stable
+    ports:
+      - "8000:80"
+    volumes:
+      - ./server:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: magicai
+      MYSQL_USER: magicai
+      MYSQL_PASSWORD: magicai
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./magicai.sql:/docker-entrypoint-initdb.d/magicai.sql:ro
+
+volumes:
+  db_data:
+
+deploy:
+  vercel:
+    name: Deploy to Vercel
+    uses: amondnet/vercel-action@v20
+    with:
+      vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+      vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+      vercel-args: '--prod'
+  - name: Trigger Vercel via API
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      PROJECT: your-project-name
+    run: |
+      curl -X POST "https://api.vercel.com/v1/integrations/deploy/${PROJECT}" \
+        -H "Authorization: Bearer $VERCEL_TOKEN"
