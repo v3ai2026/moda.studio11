@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Validate copilot-instructions.md
+        run: |
+          if [ ! -f ".github/copilot-instructions.md" ]; then
+            echo "Error: copilot-instructions.md not found"
+            exit 1
+          fi
+          echo "✓ copilot-instructions.md is present"
