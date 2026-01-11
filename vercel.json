@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "server/public" }
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/server/public/$1" }
+  ]
+}
+{
+  "version": 2,
+  "name": "magicai-frontend",
+  "builds": [
+    {
+      "src": "server/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "server/public" }
+    }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
+{
+  "redirects": [
+    { "source": "/(.*)", "destination": "https://mdio.shop/$1", "permanent": false }
+  ]
+}
